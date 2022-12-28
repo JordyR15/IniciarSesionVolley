@@ -16,8 +16,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import Model.User;
+import Utiles.ErrorLog;
 
 public class MainActivity extends AppCompatActivity {
     private TextView correo, clave;
@@ -39,21 +47,24 @@ public class MainActivity extends AppCompatActivity {
         try{
             final String parClave = correo.getText().toString().trim();
             final String parCorreo = clave.getText().toString().trim();
-            String urlService = "https://api.uealecpeterson.net/public/login";
             responseTV = (TextView) findViewById(R.id.lblDatos);
+            String urlService = "https://api.uealecpeterson.net/public/login";
             RequestQueue requestQueue = Volley.newRequestQueue(this);
             StringRequest stringRequest = new StringRequest(Request.Method.POST, urlService,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
-                            responseTV.setText("Sesión iniciada: " + response.toString());
+                            tokenParseo(response);
+                            //responseTV.setText("Método probar: " + response);
+                            //response.toString()
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
+                            responseTV.setText("Mal: ");
                         }
                     }){
                 @Override
@@ -67,6 +78,29 @@ public class MainActivity extends AppCompatActivity {
             requestQueue.add(stringRequest);
         }catch (Exception e){
             Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_LONG);
+        }
+    }
+
+    public String tokenParseo(String data){
+        try {
+            //Enviar token a un label
+            responseTV = (TextView) findViewById(R.id.lblDatos);
+            //Pattern patron = Pattern.compile("(ID\\:\\s[0-9])");
+            String data1 = "{" + data.replaceAll(".*\\{", "");
+            JSONObject objectJson = new JSONObject(data1);
+            JSONArray JSONlista = objectJson.getJSONArray("access_token");
+            /*JSONObject banco;
+            String lista = "";
+            for (int i = 0; i < JSONlista.length(); i++){
+                banco = JSONlista.getJSONObject(i);
+                lista = lista + "token: "  + banco.getString("access_token").toString();
+            }*/
+            ErrorLog.info(data1);
+            responseTV.setText("Método probar: ");
+            return "Token: ";
+        }catch (Exception e){
+            ErrorLog.error(e.getMessage());
+            return "";
         }
     }
 
